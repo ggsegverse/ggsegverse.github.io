@@ -945,106 +945,27 @@ body.quarto-dark {
 
 // ── Playground ──────────────────────────────────────────
 
-.pg-intro {
-  font-size: 1.1rem;
+.playground-frame {
+  width: 100%;
+  height: calc(100vh - 16rem);
+  min-height: 640px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  background: var(--bs-body-bg);
+}
+
+.playground-note {
+  font-size: 0.9rem;
   color: var(--bs-secondary-color);
-  margin-bottom: 1.5rem;
+  margin-top: 0.75rem;
 }
 
-.pg-selectors {
-  margin-bottom: 2rem;
-}
-
-.pg-selector-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.pg-selector-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--bs-secondary-color);
-  min-width: 4rem;
-}
-
-.pg-selector-btn {
-  background: color-mix(in srgb, var(--bs-body-bg) 85%, var(--bs-body-color));
-  color: var(--bs-body-color);
-  border: 1px solid color-mix(in srgb, var(--bs-body-bg) 70%, var(--bs-body-color));
-  border-radius: 2rem;
-  padding: 0.35rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-
-  &:hover {
-    border-color: var(--bs-primary);
-  }
-
-  &.active {
-    background: var(--bs-primary);
-    color: var(--bs-body-bg);
-    border-color: transparent;
+@media (max-width: 768px) {
+  .playground-frame {
+    height: 80vh;
   }
 }
 
-.pg-atlas-btn.active {
-  background: $brand-plum;
-  color: white;
-}
-
-.pg-display {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: start;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pg-plot {
-  display: none;
-  min-height: 200px;
-
-  &.active {
-    display: block;
-    animation: fadeInUp 0.25s ease-out;
-  }
-
-  img {
-    width: 100%;
-    height: auto;
-  }
-
-  .cell-output-display > p:last-child:not(:first-child) {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-}
-
-.pg-code-panel {
-  pre {
-    border-radius: 0.75rem;
-    font-size: 0.85rem;
-  }
-}
-
-.pg-code {
-  display: none;
-
-  &.active {
-    display: block;
-  }
-}
 
 // ── Citations page ──────────────────────────────────────
 
