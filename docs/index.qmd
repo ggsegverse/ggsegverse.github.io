@@ -25,6 +25,44 @@ Start with these resources:
 :::
 :::
 
+## Cheatsheets
+
+Three printable quick references, each a two-page PDF and an accessible web
+page built from the same source. Every example is executed against the real
+packages at render time.
+
+::: {.cheatsheet-grid}
+::: {.cheatsheet-card}
+[![](https://ggsegverse.github.io/cheatsheets/pngs/ggseg.png){fig-alt="First page of the ggseg cheatsheet"}](https://ggsegverse.github.io/cheatsheets/ggseg.html)
+
+### [2D brain plotting with ggseg](https://ggsegverse.github.io/cheatsheets/ggseg.html)
+
+`geom_brain()`, view arrangement, palettes and themes.
+
+[Read online](https://ggsegverse.github.io/cheatsheets/ggseg.html) · [PDF](https://ggsegverse.github.io/cheatsheets/ggseg.pdf)
+:::
+
+::: {.cheatsheet-card}
+[![](https://ggsegverse.github.io/cheatsheets/pngs/ggseg3d.png){fig-alt="First page of the ggseg3d cheatsheet"}](https://ggsegverse.github.io/cheatsheets/ggseg3d.html)
+
+### [3D brain plotting with ggseg3d](https://ggsegverse.github.io/cheatsheets/ggseg3d.html)
+
+`ggseg3d()`, cameras, surfaces, widget options and Shiny.
+
+[Read online](https://ggsegverse.github.io/cheatsheets/ggseg3d.html) · [PDF](https://ggsegverse.github.io/cheatsheets/ggseg3d.pdf)
+:::
+
+::: {.cheatsheet-card}
+[![](https://ggsegverse.github.io/cheatsheets/pngs/ggseg-atlases.png){fig-alt="First page of the brain atlases cheatsheet"}](https://ggsegverse.github.io/cheatsheets/ggseg-atlases.html)
+
+### [Brain atlases and data structures](https://ggsegverse.github.io/cheatsheets/ggseg-atlases.html)
+
+Installing atlases, `ggseg_atlas` objects and the atlas verbs.
+
+[Read online](https://ggsegverse.github.io/cheatsheets/ggseg-atlases.html) · [PDF](https://ggsegverse.github.io/cheatsheets/ggseg-atlases.pdf)
+:::
+:::
+
 ## Package Vignettes
 
 Browse all tutorials and articles from ggsegverse packages.
