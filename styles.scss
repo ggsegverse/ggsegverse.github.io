@@ -943,6 +943,49 @@ body.quarto-dark {
   background: rgba(255, 255, 255, 0.25);
 }
 
+// ── Cheatsheets ─────────────────────────────────────────
+
+.cheatsheet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0 3rem;
+}
+
+.cheatsheet-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bs-border-color);
+  border-top: 3px solid $brand-teal-dark;
+  border-radius: 0 0 0.75rem 0.75rem;
+  padding: 1.25rem;
+  background: var(--bs-body-bg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cheatsheet-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.cheatsheet-card img {
+  width: 100%;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  background: white;
+}
+
+.cheatsheet-card h3 {
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.cheatsheet-card p:last-child {
+  margin-top: auto;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
 // ── Playground ──────────────────────────────────────────
 
 .playground-frame {
