@@ -57,6 +57,19 @@ export function renderAtlasPackages(packages, container) {
   `).join('');
 }
 
+// Article titles and sections now come partly from markup scraped off the
+// pkgdown sites, so they reach innerHTML as untrusted text rather than as
+// values this repo controls.
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[c]);
+}
+
 export function renderVignettes(vignettes, container) {
   const grouped = {};
   for (const v of vignettes) {
@@ -64,22 +77,47 @@ export function renderVignettes(vignettes, container) {
     grouped[v.package].push(v);
   }
 
+  const items = vigs => vigs.map(v => `
+    <a href="${escapeHtml(v.url)}" target="_blank" class="vignette-item">
+      <span class="vignette-icon">📄</span>
+      <span class="vignette-title">${escapeHtml(v.title)}</span>
+    </a>
+  `).join('');
+
+  // A package whose articles declare sections gets them as subheadings; with
+  // sixteen of them in one card, ggseg.extra is unreadable as a flat list.
+  const body = vigs => {
+    const sections = [];
+    for (const v of vigs) {
+      const title = v.section;
+      const last = sections[sections.length - 1];
+      if (last && last.title === title) last.vigs.push(v);
+      else sections.push({ title, vigs: [v] });
+    }
+
+    // One section is no sections: pkgdown names the single catch-all group
+    // "All vignettes", which says nothing the card's own heading does not.
+    if (sections.length < 2 || !sections.every(s => s.title)) {
+      return `<div class="vignette-list">${items(vigs)}</div>`;
+    }
+
+    return sections.map(s => `
+      <div class="vignette-section">
+        <h4 class="vignette-section-title">${escapeHtml(s.title)}</h4>
+        <div class="vignette-list">${items(s.vigs)}</div>
+      </div>
+    `).join('');
+  };
+
   container.innerHTML = Object.entries(grouped).map(([pkg, vigs]) => `
     <div class="docs-package-card">
       <div class="docs-package-header">
-        <h3>${pkg}</h3>
-        <a href="https://ggsegverse.github.io/${pkg}/" target="_blank" class="docs-site-link">
+        <h3>${escapeHtml(pkg)}</h3>
+        <a href="https://ggsegverse.github.io/${encodeURIComponent(pkg)}/" target="_blank" class="docs-site-link">
           Full docs &rarr;
         </a>
       </div>
-      <div class="vignette-list">
-        ${vigs.map(v => `
-          <a href="${v.url}" target="_blank" class="vignette-item">
-            <span class="vignette-icon">📄</span>
-            <span class="vignette-title">${v.title}</span>
-          </a>
-        `).join('')}
-      </div>
+      ${body(vigs)}
     </div>
   `).join('');
 }
