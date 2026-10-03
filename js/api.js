@@ -1,4 +1,5 @@
 const API_URL = 'https://ggsegverse.r-universe.dev/api/packages';
+const SITE_URL = 'https://ggsegverse.github.io';
 const CORE_PACKAGES = ['ggseg', 'ggseg3d', 'ggseg.formats', 'ggseg.extra'];
 
 let cachedData = null;
@@ -28,26 +29,98 @@ export async function getAtlasPackages() {
     .map(transformPackage);
 }
 
-export async function getVignettes() {
-  const packages = await fetchPackages();
-  const vignettes = [];
+// r-universe only knows what is in the tarball, and a pkgdown site publishes
+// more than that: anything under vignettes/articles/ is Rbuildignored, so
+// ggseg.extra's nine pre-knit tutorials never appear in the package metadata.
+// Each package's pkgdown site is the authoritative list, read here from the
+// articles.json that ggseg.extra's articles-index workflow commits.
+async function fetchPkgdownIndex(pkg) {
+  const response = await fetch(`${SITE_URL}/${pkg}/articles.json`);
+  if (!response.ok) throw new Error(`no articles.json for ${pkg}`);
+  const data = await response.json();
 
-  for (const pkg of packages) {
-    if (!pkg.Package.startsWith('ggseg')) continue;
-    const vigs = pkg._vignettes || [];
-    for (const vig of vigs) {
-      vignettes.push({
-        package: pkg.Package,
-        title: vig.title,
-        source: vig.source,
-        url: `https://ggsegverse.github.io/${pkg.Package}/articles/${vig.source.replace(/\.Rmd$/, '.html')}`
+  return data.articles.map(a => ({
+    package: pkg,
+    title: a.title,
+    section: a.section || null,
+    url: `${SITE_URL}/${pkg}/${a.href}`
+  }));
+}
+
+// Fallback for a package whose site predates the index: pkgdown's own
+// articles listing carries the same titles and sections in its markup.
+async function scrapePkgdownIndex(pkg) {
+  const response = await fetch(`${SITE_URL}/${pkg}/articles/index.html`);
+  if (!response.ok) throw new Error(`no articles index for ${pkg}`);
+  const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+
+  const sections = doc.querySelectorAll('main .section');
+  const scopes = sections.length ? sections : [doc.querySelector('main')].filter(Boolean);
+
+  const articles = [];
+  for (const scope of scopes) {
+    const heading = scope.querySelector('h2, h3');
+    for (const link of scope.querySelectorAll('dl dt a[href]')) {
+      const href = link.getAttribute('href');
+      if (!href.endsWith('.html')) continue;
+      articles.push({
+        package: pkg,
+        title: link.textContent.trim(),
+        section: sections.length && heading ? heading.textContent.trim() : null,
+        url: `${SITE_URL}/${pkg}/articles/${href}`
       });
     }
   }
+  return articles;
+}
 
-  return vignettes.sort((a, b) =>
-    a.package.localeCompare(b.package) || a.title.localeCompare(b.title)
-  );
+// Only the last step here loses anything: both pkgdown sources list the same
+// articles, but r-universe cannot see the ones outside the tarball. Reaching
+// it costs ggseg.extra its ten website-only tutorials, so say so rather than
+// degrading silently to a page that is merely missing things.
+async function getPkgdownArticles(pkg) {
+  try {
+    return await fetchPkgdownIndex(pkg);
+  } catch {
+    try {
+      return await scrapePkgdownIndex(pkg);
+    } catch (error) {
+      console.warn(`${pkg}: no pkgdown article index, using r-universe`, error);
+      return [];
+    }
+  }
+}
+
+export async function getVignettes() {
+  const packages = await fetchPackages();
+  const byPackage = new Map();
+
+  for (const pkg of packages) {
+    if (!pkg.Package.startsWith('ggseg')) continue;
+    const vigs = (pkg._vignettes || []).map(vig => ({
+      package: pkg.Package,
+      title: vig.title,
+      section: null,
+      url: `${SITE_URL}/${pkg.Package}/articles/${vig.source.replace(/\.(Rmd|rmd|qmd)$/, '.html')}`
+    }));
+    if (vigs.length) {
+      byPackage.set(pkg.Package, vigs.sort((a, b) => a.title.localeCompare(b.title)));
+    }
+  }
+
+  // Only the core packages are worth an extra request each: the atlas
+  // packages ship no website-only articles and there are around thirty of
+  // them. A package's pkgdown index replaces its r-universe entries rather
+  // than adding to them -- it is a superset, it carries the section each
+  // article belongs to, and its declared order is the one the site uses.
+  const indexed = await Promise.all(CORE_PACKAGES.map(getPkgdownArticles));
+  CORE_PACKAGES.forEach((pkg, i) => {
+    if (indexed[i].length) byPackage.set(pkg, indexed[i]);
+  });
+
+  return Array.from(byPackage.keys())
+    .sort((a, b) => a.localeCompare(b))
+    .flatMap(pkg => byPackage.get(pkg));
 }
 
 export async function getContributors() {
